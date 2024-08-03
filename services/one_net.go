@@ -51,21 +51,46 @@ func (oneNet *OneNetService) Auth(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(msg.(string)))
 	}
 }
+
+type OneNetMessage struct {
+	Msg       OneNetMessageItem `json:"msg"`
+	Nonce     string            `json:"nonce"`
+	Signature string            `json:"signature"`
+	Time      int64             `json:"time"`
+	Id        string            `json:"id"`
+}
+
+type OneNetMessageItem struct {
+	Type        *int        `json:"type,omitempty"`
+	DevName     *string     `json:"dev_name,omitempty"`
+	PID         *string     `json:"pid,omitempty"`
+	Status      *int        `json:"status,omitempty"`
+	At          *int64      `json:"at,omitempty"`
+	DSID        *string     `json:"ds_id,omitempty"`
+	Value       *int        `json:"value,omitempty"`
+	ProjectID   *string     `json:"projectId,omitempty"`
+	ProductID   *string     `json:"productId,omitempty"`
+	DeviceName  *string     `json:"deviceName,omitempty"`
+	MessageType *string     `json:"messageType,omitempty"`
+	NotifyType  *string     `json:"notifyType,omitempty"`
+	IMEI        *string     `json:"imei,omitempty"`
+	Data        *NotifyData `json:"data,omitempty"`
+}
+
+type NotifyData struct {
+	ID     string                 `json:"id"`
+	Params map[string]interface{} `json:"params"`
+}
+
 func (oneNet *OneNetService) dataResolve(w http.ResponseWriter, r *http.Request) {
 	//logrus.Debug(r.MultipartForm.Value)
 	decoder := json.NewDecoder(r.Body)
 	defer func(Body io.ReadCloser) {
 		_ = Body.Close()
 	}(r.Body)
-	type OneNetMessage struct {
-		Msg       string `json:"msg"`
-		Nonce     string `json:"nonce"`
-		Signature string `json:"signature"`
-		Time      int64  `json:"time"`
-		Id        string `json:"id"`
-	}
+
 	var msg OneNetMessage
-	logrus.Debug(decoder.Decode(&msg), fmt.Sprintf("%#v", msg))
+	logrus.Debug(decoder.Decode(&msg), fmt.Sprintf("%#v", msg.Msg))
 }
 
 func (oneNet *OneNetService) ResponseSuc(r http.ResponseWriter) {
