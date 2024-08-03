@@ -57,8 +57,15 @@ func (oneNet *OneNetService) dataResolve(w http.ResponseWriter, r *http.Request)
 	defer func(Body io.ReadCloser) {
 		_ = Body.Close()
 	}(r.Body)
-
-	logrus.Debug(decoder)
+	type OneNetMessage struct {
+		Msg       string `json:"msg"`
+		Nonce     string `json:"nonce"`
+		Signature string `json:"signature"`
+		Time      int64  `json:"time"`
+		Id        string `json:"id"`
+	}
+	var msg OneNetMessage
+	logrus.Debug(decoder.Decode(&msg), msg)
 }
 
 func (oneNet *OneNetService) ResponseSuc(r http.ResponseWriter) {
