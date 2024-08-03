@@ -1,0 +1,25 @@
+server:
+  address: 0.0.0.0:8280 #服务地址
+  identifier: ONENET # 服务唯一标识符注册插件时候的服务标识符字段
+
+mqtt:
+  broker: 127.0.0.1:1883 #mqtt服务端地址
+  username: root
+  password: root
+  telemetry_topic_to_publish: devices/telemetry #发送遥测数据主题
+  attributes_topic_to_publish: devices/attributes/ #发布属性数据主题
+  topic_to_subscribe: service/video/#
+  command_topic_to_subscribe: devices/command
+  status_topic: device/status
+  qos: 0 #qos
+
+http_server:
+  address: 0.0.0.0:8281 #http服务地址
+
+thingspanel:
+  address: http://127.0.0.1:9999 #thingspanel服务地址
+
+
+log: 
+  # 日志级别 debug, info, warn, error, fatal, panic
+  level: debug

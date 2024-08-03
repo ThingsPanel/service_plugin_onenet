@@ -1,0 +1,13 @@
+[
+    {
+        "dataKey": "url",
+        "label": "流媒体播放地址",
+        "placeholder": "请输入流媒体播放地址",
+        "type": "input",
+        "validate": {
+            "message": "不能为空",
+            "required": true,
+            "type": "string"
+        }
+    }
+]
