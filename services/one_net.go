@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	httpclient "plugin_onenet/http_client"
 	"strings"
 )
 
@@ -94,7 +95,51 @@ func (oneNet *OneNetService) dataResolve(w http.ResponseWriter, r *http.Request)
 	var msgItem OneNetMessageItem
 	err := json.Unmarshal([]byte(msg.Msg), &msgItem)
 	logrus.Debug(err, fmt.Sprintf("%#v", msgItem))
+	var (
+		productId    string
+		deviceNumber string
+	)
+	switch {
+	case oneNet.getMsgTypeDeviceOnline(msgItem): //设备上线 下线
+		productId = *msgItem.PID
+		deviceNumber = fmt.Sprintf("%s-%s", *msgItem.PID, *msgItem.DevName)
+	case oneNet.getMsgTypeDeviceAttribute(msgItem): //属性上报
+		productId = *msgItem.ProductID
+		deviceNumber = fmt.Sprintf("%s-%s", *msgItem.ProductID, *msgItem.DeviceName)
+	case oneNet.getMsgTypeDeviceEvent(msgItem): //事件上报
+		productId = *msgItem.ProductID
+		deviceNumber = fmt.Sprintf("%s-%s", *msgItem.ProductID, *msgItem.DeviceName)
+	default:
+		logrus.Debug("暂时不支持的数据类型")
+		return
+	}
+	logrus.Debug(productId, deviceNumber)
+	// 读取设备信息
+	deviceInfo, err := httpclient.GetDeviceConfig(deviceNumber)
+	if err != nil {
+		// 获取设备信息失败，请检查连接包是否正确
+		logrus.Error(err)
+		return
+	}
+	logrus.Debug(deviceInfo, productId)
+}
 
+// getMsgTypeDeviceOnline
+// @description 设备上线 下线
+func (oneNet *OneNetService) getMsgTypeDeviceOnline(msgItem OneNetMessageItem) bool {
+	return msgItem.Type != nil && *msgItem.Type == 2
+}
+
+// getMsgTypeDeviceOnline
+// @description 设备属性上报
+func (oneNet *OneNetService) getMsgTypeDeviceAttribute(msgItem OneNetMessageItem) bool {
+	return msgItem.MessageType != nil && *msgItem.MessageType == "notify" && msgItem.NotifyType != nil && *msgItem.NotifyType == "property"
+}
+
+// getMsgTypeDeviceEvent
+// @description 设备属性上报
+func (oneNet *OneNetService) getMsgTypeDeviceEvent(msgItem OneNetMessageItem) bool {
+	return msgItem.MessageType != nil && *msgItem.MessageType == "notify" && msgItem.NotifyType != nil && *msgItem.NotifyType == "event"
 }
 
 func (oneNet *OneNetService) ResponseSuc(r http.ResponseWriter) {

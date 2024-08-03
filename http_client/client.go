@@ -19,10 +19,9 @@ func Init() {
 	go ServiceHeartbeat()
 }
 
-func GetDeviceConfig(voucher string, deviceID string) (*api.DeviceConfigResponse, error) {
+func GetDeviceConfig(deviceNumber string) (*api.DeviceConfigResponse, error) {
 	deviceConfigReq := api.DeviceConfigRequest{
-		Voucher:  voucher,
-		DeviceID: deviceID,
+		DeviceNumber: deviceNumber,
 	}
 	response, err := client.API.GetDeviceConfig(deviceConfigReq)
 	if err != nil {
