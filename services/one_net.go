@@ -65,7 +65,7 @@ func (oneNet *OneNetService) dataResolve(w http.ResponseWriter, r *http.Request)
 		Id        string `json:"id"`
 	}
 	var msg OneNetMessage
-	logrus.Debug(decoder.Decode(&msg), msg)
+	logrus.Debug(decoder.Decode(&msg), fmt.Sprintf("%#v", msg))
 }
 
 func (oneNet *OneNetService) ResponseSuc(r http.ResponseWriter) {
