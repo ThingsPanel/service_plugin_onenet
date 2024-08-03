@@ -53,11 +53,11 @@ func (oneNet *OneNetService) Auth(w http.ResponseWriter, r *http.Request) {
 }
 
 type OneNetMessage struct {
-	Msg       OneNetMessageItem `json:"msg"`
-	Nonce     string            `json:"nonce"`
-	Signature string            `json:"signature"`
-	Time      int64             `json:"time"`
-	Id        string            `json:"id"`
+	Msg       string `json:"msg"`
+	Nonce     string `json:"nonce"`
+	Signature string `json:"signature"`
+	Time      int64  `json:"time"`
+	Id        string `json:"id"`
 }
 
 type OneNetMessageItem struct {
@@ -91,6 +91,10 @@ func (oneNet *OneNetService) dataResolve(w http.ResponseWriter, r *http.Request)
 
 	var msg OneNetMessage
 	logrus.Debug(decoder.Decode(&msg), fmt.Sprintf("%#v", msg.Msg))
+	var msgItem OneNetMessageItem
+	err := json.Unmarshal([]byte(msg.Msg), &msgItem)
+	logrus.Debug(err, fmt.Sprintf("%#v", msgItem))
+
 }
 
 func (oneNet *OneNetService) ResponseSuc(r http.ResponseWriter) {
