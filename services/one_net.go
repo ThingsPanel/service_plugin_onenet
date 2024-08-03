@@ -1,8 +1,10 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -19,24 +21,22 @@ func NewOneNet() *OneNetService {
 }
 
 func (oneNet *OneNetService) Init() *http.ServeMux {
-	oneNet.mux.HandleFunc("/accept", oneNet.telemetry)
+	oneNet.mux.HandleFunc("/accept", oneNet.accept)
 	return oneNet.mux
 }
 
-func (oneNet *OneNetService) telemetry(w http.ResponseWriter, r *http.Request) {
+func (oneNet *OneNetService) accept(w http.ResponseWriter, r *http.Request) {
+
 	if r.Method == http.MethodGet {
 		//验证
 		oneNet.Auth(w, r)
 		return
 	}
-	queryMap, err := Parse(r.URL.RawQuery)
-	if err != nil {
-		logrus.Debug(err)
-		return
+
+	if r.Method == http.MethodPost {
+		oneNet.dataResolve(w, r)
 	}
-	logrus.Debug(r.URL.RawQuery, queryMap)
-	response := "ok"
-	_, _ = w.Write([]byte(response))
+	_, _ = w.Write([]byte(""))
 }
 
 func (oneNet *OneNetService) Auth(w http.ResponseWriter, r *http.Request) {
@@ -50,6 +50,15 @@ func (oneNet *OneNetService) Auth(w http.ResponseWriter, r *http.Request) {
 	if msg, ok := queryMap["msg"]; ok {
 		_, _ = w.Write([]byte(msg.(string)))
 	}
+}
+func (oneNet *OneNetService) dataResolve(w http.ResponseWriter, r *http.Request) {
+	//logrus.Debug(r.MultipartForm.Value)
+	decoder := json.NewDecoder(r.Body)
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(r.Body)
+
+	logrus.Debug(decoder)
 }
 
 func (oneNet *OneNetService) ResponseSuc(r http.ResponseWriter) {
