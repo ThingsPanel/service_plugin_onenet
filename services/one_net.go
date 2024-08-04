@@ -1,11 +1,10 @@
 package services
 
 import (
-	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"io"
 	"net/http"
 	"net/url"
@@ -107,17 +106,21 @@ func (oneNet *OneNetService) dataResolve(w http.ResponseWriter, r *http.Request)
 	var (
 		productId    string
 		deviceNumber string
+		deviceName   string
 	)
 	switch {
 	case oneNet.getMsgTypeDeviceOnline(msgItem): //设备上线 下线
 		productId = *msgItem.PID
-		deviceNumber = fmt.Sprintf("%s-%s", *msgItem.PID, *msgItem.DevName)
+		deviceNumber = fmt.Sprintf(viper.GetString("onenet.device_number_key"), *msgItem.PID, *msgItem.DevName)
+		deviceName = *msgItem.DevName
 	case oneNet.getMsgTypeDeviceAttribute(msgItem): //属性上报
 		productId = *msgItem.ProductID
-		deviceNumber = fmt.Sprintf("%s-%s", *msgItem.ProductID, *msgItem.DeviceName)
+		deviceName = *msgItem.DeviceName
+		deviceNumber = fmt.Sprintf(viper.GetString("onenet.device_number_key"), *msgItem.ProductID, *msgItem.DeviceName)
 	case oneNet.getMsgTypeDeviceEvent(msgItem): //事件上报
 		productId = *msgItem.ProductID
-		deviceNumber = fmt.Sprintf("%s-%s", *msgItem.ProductID, *msgItem.DeviceName)
+		deviceName = *msgItem.DeviceName
+		deviceNumber = fmt.Sprintf(viper.GetString("onenet.device_number_key"), *msgItem.ProductID, *msgItem.DeviceName)
 	default:
 		logrus.Debug("暂时不支持的数据类型")
 		return
@@ -125,17 +128,18 @@ func (oneNet *OneNetService) dataResolve(w http.ResponseWriter, r *http.Request)
 	logrus.Debug(productId, deviceNumber)
 	// 读取设备信息
 	deviceInfo, err := httpclient.GetDeviceConfig(deviceNumber)
-	if errors.Is(err, sql.ErrNoRows) {
+	if err != nil {
+		// 获取设备信息失败，请检查连接包是否正确
+		logrus.Error(err)
+		return
+	}
+	if deviceInfo.Code != 200 {
 		//未查询到设备 增加未查询到列表
-		err = cache.SetDeviceInfo(r.Context(), productId, deviceNumber)
+		err = cache.SetDeviceInfo(r.Context(), productId, deviceName)
 		if err != nil {
 			logrus.Error(err)
 			return
 		}
-	} else if err != nil {
-		// 获取设备信息失败，请检查连接包是否正确
-		logrus.Error(err)
-		return
 	}
 	logrus.Debug(deviceInfo, productId)
 	switch {
