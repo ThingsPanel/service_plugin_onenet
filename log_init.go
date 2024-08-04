@@ -66,6 +66,7 @@ func LogInIt() {
 	}
 
 	levelStr := viper.GetString("log.level")
+	fmt.Println(levelStr)
 	if level, ok := logLevels[levelStr]; ok {
 		logrus.SetLevel(level)
 	} else {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"plugin_onenet/cache"
 	httpclient "plugin_onenet/http_client"
 	httpservice "plugin_onenet/http_service"
 	"plugin_onenet/mqtt"
@@ -15,6 +16,8 @@ func main() {
 	conf()
 	LogInIt()
 	log.Println("Starting the application...")
+	//初始化redis
+	cache.RedisInit()
 	// 启动mqtt客户端
 	mqtt.InitClient()
 	// 启动http客户端

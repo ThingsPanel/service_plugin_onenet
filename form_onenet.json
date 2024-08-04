@@ -1,8 +1,19 @@
 [
   {
-    "dataKey": "url",
-    "label": "流媒体播放地址",
-    "placeholder": "请输入流媒体播放地址",
+    "dataKey": "productId",
+    "label": "产品id",
+    "placeholder": "请输入产品id",
+    "type": "input",
+    "validate": {
+      "message": "不能为空",
+      "required": true,
+      "type": "string"
+    }
+  },
+  {
+    "dataKey": "accessKey",
+    "label": "产品access_key",
+    "placeholder": "请输入产品access_key",
     "type": "input",
     "validate": {
       "message": "不能为空",

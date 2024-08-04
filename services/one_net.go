@@ -1,13 +1,17 @@
 package services
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"net/url"
+	"plugin_onenet/cache"
 	httpclient "plugin_onenet/http_client"
+	"plugin_onenet/mqtt"
 	"strings"
 )
 
@@ -83,6 +87,11 @@ type NotifyData struct {
 	Params map[string]interface{} `json:"params"`
 }
 
+type AttributeItem struct {
+	Value interface{} `json:"value"`
+	Time  int64       `json:"time"`
+}
+
 func (oneNet *OneNetService) dataResolve(w http.ResponseWriter, r *http.Request) {
 	//logrus.Debug(r.MultipartForm.Value)
 	decoder := json.NewDecoder(r.Body)
@@ -116,12 +125,44 @@ func (oneNet *OneNetService) dataResolve(w http.ResponseWriter, r *http.Request)
 	logrus.Debug(productId, deviceNumber)
 	// 读取设备信息
 	deviceInfo, err := httpclient.GetDeviceConfig(deviceNumber)
-	if err != nil {
+	if errors.Is(err, sql.ErrNoRows) {
+		//未查询到设备 增加未查询到列表
+		err = cache.SetDeviceInfo(r.Context(), productId, deviceNumber)
+		if err != nil {
+			logrus.Error(err)
+			return
+		}
+	} else if err != nil {
 		// 获取设备信息失败，请检查连接包是否正确
 		logrus.Error(err)
 		return
 	}
 	logrus.Debug(deviceInfo, productId)
+	switch {
+	case oneNet.getMsgTypeDeviceOnline(msgItem): //设备上线 下线
+
+	case oneNet.getMsgTypeDeviceAttribute(msgItem): //属性上报
+		data := make(map[string]interface{})
+		if msgItem.Data == nil {
+			return
+		}
+		for k, v := range msgItem.Data.Params {
+			var val AttributeItem
+			_ = json.Unmarshal([]byte(v.(string)), &val)
+			data[k] = val.Value
+		}
+		err = mqtt.PublishTelemetry(deviceInfo.Data.ID, data)
+		if err != nil {
+			logrus.Error(err)
+		}
+	case oneNet.getMsgTypeDeviceEvent(msgItem): //事件上报
+		productId = *msgItem.ProductID
+		deviceNumber = fmt.Sprintf("%s-%s", *msgItem.ProductID, *msgItem.DeviceName)
+	default:
+		logrus.Debug("暂时不支持的数据类型")
+		return
+	}
+
 }
 
 // getMsgTypeDeviceOnline

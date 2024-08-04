@@ -9,8 +9,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"plugin_onenet/cache"
 	httpclient "plugin_onenet/http_client"
 	"plugin_onenet/services"
+	"strconv"
 
 	tpprotocolsdkgo "github.com/ThingsPanel/tp-protocol-sdk-go"
 	"github.com/sirupsen/logrus"
@@ -60,7 +62,7 @@ func OnGetForm(w http.ResponseWriter, r *http.Request) {
 		RspSuccess(w, nil)
 	case "SVCR":
 		//服务凭证类型表单
-		RspSuccess(w, readFormConfigByPath("./form_service_voucher.json"))
+		RspSuccess(w, readFormConfigByPath("./form_onenet.json"))
 	default:
 		RspError(w, errors.New("not support form type: "+form_type))
 	}
@@ -99,27 +101,26 @@ func readFormConfigByPath(path string) interface{} {
 
 func OnGetDeviceList(w http.ResponseWriter, r *http.Request) {
 	logrus.Info("OnGetDeviceList")
-	r.ParseForm() //解析参数，默认是不会解析的
+	//r.ParseForm() //解析参数，默认是不会解析的
 	logrus.Info("【收到api请求】path", r.URL.Path)
-	logrus.Info("query", r.URL.Query())
-	voucher := r.URL.Query()["voucher"][0]
-	// service_identifier := r.URL.Query()["service_identifier"][0]
-	// 对voucher做md5签名
-	sign := GetMD5Hash(voucher)
-	type deviceInfo struct {
-		DeviceName   string `json:"device_name"`
-		Description  string `json:"description"`
-		DeviceNumber string `json:"device_number"`
-	}
+	logrus.Info("query", r.FormValue("voucher"))
+	productId := r.FormValue("voucher")
+	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
+	pageSize, _ := strconv.ParseInt(r.FormValue("page_size"), 10, 64)
 	data := make(map[string]interface{})
-	var deviceList []deviceInfo
-	device := deviceInfo{
-		DeviceName:   "视频监控",
-		DeviceNumber: sign,
+	if page == 0 {
+		page = 1
 	}
-	deviceList = append(deviceList, device)
-	data["list"] = deviceList
-	data["total"] = 1
+	if pageSize == 0 {
+		pageSize = 10
+	}
+	total, list, err := cache.GetDeviceList(r.Context(), productId, page, pageSize)
+	if err != nil {
+		RspError(w, err)
+		return
+	}
+	data["list"] = list
+	data["total"] = total
 
 	// 获取设备列表
 	RspSuccess(w, data)
