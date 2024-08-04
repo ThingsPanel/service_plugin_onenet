@@ -138,8 +138,9 @@ func (oneNet *OneNetService) dataResolve(w http.ResponseWriter, r *http.Request)
 		err = cache.SetDeviceInfo(r.Context(), productId, deviceName)
 		if err != nil {
 			logrus.Error(err)
-			return
+
 		}
+		return
 	}
 	logrus.Debug(deviceInfo, productId)
 	switch {
@@ -152,6 +153,7 @@ func (oneNet *OneNetService) dataResolve(w http.ResponseWriter, r *http.Request)
 		}
 		for k, v := range msgItem.Data.Params {
 			//var val AttributeItem
+			logrus.Debug("k, v:", k, v)
 			val := v.(AttributeItem)
 			data[k] = val.Value
 		}
