@@ -99,12 +99,21 @@ func readFormConfigByPath(path string) interface{} {
 	}
 }
 
+type OneNetVoucher struct {
+	ProductId string `json:"productId"`
+	AccessKey string `json:"accessKey"`
+}
+
 func OnGetDeviceList(w http.ResponseWriter, r *http.Request) {
 	logrus.Info("OnGetDeviceList")
 	//r.ParseForm() //解析参数，默认是不会解析的
 	logrus.Info("【收到api请求】path", r.URL.Path)
 	logrus.Info("query", r.FormValue("voucher"))
-	productId := r.FormValue("voucher")
+	var voucher OneNetVoucher
+	err := json.Unmarshal([]byte(r.FormValue("voucher")), &voucher)
+	if err != nil {
+		return
+	}
 	page, _ := strconv.ParseInt(r.FormValue("page"), 10, 64)
 	pageSize, _ := strconv.ParseInt(r.FormValue("page_size"), 10, 64)
 	data := make(map[string]interface{})
@@ -114,7 +123,7 @@ func OnGetDeviceList(w http.ResponseWriter, r *http.Request) {
 	if pageSize == 0 {
 		pageSize = 10
 	}
-	total, list, err := cache.GetDeviceList(r.Context(), productId, page, pageSize)
+	total, list, err := cache.GetDeviceList(r.Context(), voucher.ProductId, page, pageSize)
 	if err != nil {
 		RspError(w, err)
 		return
