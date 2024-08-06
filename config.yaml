@@ -11,7 +11,7 @@ mqtt:
   event_topic_to_publish: devices/event/ #上报事件
   topic_to_subscribe: service/onenet/#
   command_topic_to_subscribe: devices/command
-  status_topic: device/status
+  status_topic: devices/status/
   qos: 0 #qos
 
 http_server:
