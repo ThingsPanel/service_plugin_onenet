@@ -145,7 +145,7 @@ func (oneNet *OneNetService) dataResolve(w http.ResponseWriter, r *http.Request)
 	logrus.Debug(deviceInfo, productId)
 	switch {
 	case oneNet.getMsgTypeDeviceOnline(msgItem): //设备上线 下线
-		err = mqtt.DeviceStatusUpdate(deviceNumber, *msgItem.Status)
+		err = mqtt.DeviceStatusUpdate(deviceInfo.Data.ID, *msgItem.Status)
 		if err != nil {
 			logrus.Error(err)
 		}
