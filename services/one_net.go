@@ -170,7 +170,7 @@ func (oneNet *OneNetService) dataResolve(w http.ResponseWriter, r *http.Request)
 		if msgItem.Data == nil {
 			return
 		}
-		logrus.Debug(msgItem.Data)
+		logrus.Debug("event", fmt.Sprintf("%#v", msgItem.Data))
 		//data := model.EventInfo{
 		//	Method: "",
 		//	Params: nil,
