@@ -135,7 +135,7 @@ func PublishCommandResponse(deviceID string, messageID string, data map[string]i
 
 func DeviceStatusUpdate(deviceID string, status int) error {
 	topic := viper.GetString("mqtt.status_topic") + "/" + deviceID
-	err := MqttClient.Publish(topic, fmt.Sprintf("%d", status), uint8(0))
+	err := MqttClient.Publish(topic, fmt.Sprintf("%d", status), uint8(1))
 	if err != nil {
 		logrus.Warn("上下线失败:", err)
 		return err
