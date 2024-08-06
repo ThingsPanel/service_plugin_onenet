@@ -152,14 +152,13 @@ func (oneNet *OneNetService) dataResolve(w http.ResponseWriter, r *http.Request)
 			return
 		}
 		for k, v := range msgItem.Data.Params {
-			var val AttributeItem
 			logrus.Debug("k:", k)
 			logrus.Debug("v:", v)
-			valStr := v.(string)
-			_ = json.Unmarshal([]byte(valStr), &val)
-			logrus.Debug("val:", val)
-			data[k] = val.Value
+			if valStr, ok := v.(map[string]interface{}); ok {
+				data[k] = valStr["value"]
+			}
 		}
+		logrus.Debug("data:", data)
 		err = mqtt.PublishTelemetry(deviceInfo.Data.ID, data)
 		if err != nil {
 			logrus.Error(err)
