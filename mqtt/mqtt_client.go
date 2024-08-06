@@ -150,7 +150,7 @@ func DeviceStatusUpdate(deviceID string, status int) error {
 // @description 事件上报
 func PublishEvent(deviceID string, msg model.EventInfo) error {
 	qos := viper.GetUint("mqtt.qos")
-	topic := viper.GetString("mqtt.event_topic_to_publish") + "/" + GetMessageID()
+	topic := viper.GetString("mqtt.event_topic_to_publish") + GetMessageID()
 	values, _ := json.Marshal(msg)
 	data := map[string]interface{}{
 		"device_id": deviceID,
