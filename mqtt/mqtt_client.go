@@ -2,6 +2,7 @@ package mqtt
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -129,6 +130,17 @@ func PublishCommandResponse(deviceID string, messageID string, data map[string]i
 	logrus.Debug("消息内容:", string(payload))
 	logrus.Debug("\n==>tp 发送消息成功:", string(newMsgJson))
 
+	return nil
+}
+
+func DeviceStatusUpdate(deviceID string, status int) error {
+	topic := viper.GetString("mqtt.status_topic") + "/" + deviceID
+	err := MqttClient.Publish(topic, fmt.Sprintf("%d", status), uint8(0))
+	if err != nil {
+		logrus.Warn("上下线失败:", err)
+		return err
+	}
+	logrus.Debug("上下线失败成功:", topic, ",", status)
 	return nil
 }
 
