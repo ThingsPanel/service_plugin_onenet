@@ -1,7 +1,7 @@
 package model
 
 type DeviceItem struct {
-	DeviceNumber string `json:"deviceNumber"`
-	DeviceName   string `json:"deviceName"`
+	DeviceNumber string `json:"device_number"`
+	DeviceName   string `json:"device_name"`
 	Description  string `json:"description"`
 }
