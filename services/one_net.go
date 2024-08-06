@@ -175,7 +175,7 @@ func (oneNet *OneNetService) dataResolve(w http.ResponseWriter, r *http.Request)
 		for k, v := range msgItem.Data.Params {
 			params := make(map[string]interface{})
 			if valStr, ok := v.(map[string]interface{}); ok {
-				params = valStr
+				params = valStr["value"].(map[string]interface{})
 			}
 			data := model.EventInfo{
 				Method: k,
