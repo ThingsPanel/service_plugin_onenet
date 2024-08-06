@@ -167,8 +167,18 @@ func (oneNet *OneNetService) dataResolve(w http.ResponseWriter, r *http.Request)
 			logrus.Error(err)
 		}
 	case oneNet.getMsgTypeDeviceEvent(msgItem): //事件上报
-		productId = *msgItem.ProductID
-		deviceNumber = fmt.Sprintf("%s-%s", *msgItem.ProductID, *msgItem.DeviceName)
+		if msgItem.Data == nil {
+			return
+		}
+		logrus.Debug(msgItem.Data)
+		//data := model.EventInfo{
+		//	Method: "",
+		//	Params: nil,
+		//}
+		//err = mqtt.PublishEvent(deviceInfo.Data.ID, data)
+		//if err != nil {
+		//	logrus.Error(err)
+		//}
 	default:
 		logrus.Debug("暂时不支持的数据类型")
 		return

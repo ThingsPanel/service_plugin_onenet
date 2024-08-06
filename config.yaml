@@ -8,6 +8,7 @@ mqtt:
   password: root
   telemetry_topic_to_publish: devices/telemetry #发送遥测数据主题
   attributes_topic_to_publish: devices/attributes/ #发布属性数据主题
+  event_topic_to_publish: devices/event/ #上报事件
   topic_to_subscribe: service/onenet/#
   command_topic_to_subscribe: devices/command
   status_topic: device/status

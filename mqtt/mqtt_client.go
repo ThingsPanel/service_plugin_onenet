@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"plugin_onenet/model"
 	"strconv"
 	"time"
 
@@ -135,12 +136,33 @@ func PublishCommandResponse(deviceID string, messageID string, data map[string]i
 
 func DeviceStatusUpdate(deviceID string, status int) error {
 	topic := viper.GetString("mqtt.status_topic") + "/" + deviceID
-	err := MqttClient.Publish(topic, fmt.Sprintf("%d", status), uint8(1))
+	qos := viper.GetUint("mqtt.qos")
+	err := MqttClient.Publish(topic, fmt.Sprintf("%d", status), uint8(qos))
 	if err != nil {
 		logrus.Warn("上下线失败:", err)
 		return err
 	}
 	logrus.Debug("上下线失败成功:", topic, ",", status)
+	return nil
+}
+
+// PublishEvent
+// @description 事件上报
+func PublishEvent(deviceID string, msg model.EventInfo) error {
+	qos := viper.GetUint("mqtt.qos")
+	topic := viper.GetString("mqtt.event_topic_to_publish") + "/" + GetMessageID()
+	values, _ := json.Marshal(msg)
+	data := map[string]interface{}{
+		"device_id": deviceID,
+		"values":    values,
+	}
+	payload, _ := json.Marshal(data)
+	err := MqttClient.Publish(topic, string(payload), uint8(qos))
+	if err != nil {
+		logrus.Warn("事件上报:", err)
+		return err
+	}
+	logrus.Debug("事件上报:", topic, ",", msg)
 	return nil
 }
 
