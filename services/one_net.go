@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"plugin_onenet/cache"
 	httpclient "plugin_onenet/http_client"
+	"plugin_onenet/model"
 	"plugin_onenet/mqtt"
 	"strings"
 )
@@ -171,14 +172,21 @@ func (oneNet *OneNetService) dataResolve(w http.ResponseWriter, r *http.Request)
 			return
 		}
 		logrus.Debug("event", fmt.Sprintf("%#v", msgItem.Data))
-		//data := model.EventInfo{
-		//	Method: "",
-		//	Params: nil,
-		//}
-		//err = mqtt.PublishEvent(deviceInfo.Data.ID, data)
-		//if err != nil {
-		//	logrus.Error(err)
-		//}
+		for k, v := range msgItem.Data.Params {
+			params := make(map[string]interface{})
+			if valStr, ok := v.(map[string]interface{}); ok {
+				params = valStr
+			}
+			data := model.EventInfo{
+				Method: k,
+				Params: params,
+			}
+			err = mqtt.PublishEvent(deviceInfo.Data.ID, data)
+			if err != nil {
+				logrus.Error(err)
+			}
+		}
+
 	default:
 		logrus.Debug("暂时不支持的数据类型")
 		return
