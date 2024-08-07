@@ -11,7 +11,6 @@ import (
 	"os"
 	"plugin_onenet/cache"
 	httpclient "plugin_onenet/http_client"
-	"plugin_onenet/services"
 	"strconv"
 
 	tpprotocolsdkgo "github.com/ThingsPanel/tp-protocol-sdk-go"
@@ -206,5 +205,5 @@ func OnNotifyProperty(serviceAccessID string) {
 	}
 	logrus.Info("获取服务接入点成功", rspData.Data)
 	// 处理接入点
-	services.DealPoint(rspData.Data)
+	//services.DealPoint(rspData.Data)
 }
