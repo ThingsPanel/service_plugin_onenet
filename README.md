@@ -1,4 +1,4 @@
-# 移动onenet接入
+# 移动OneNet接入
 
 ## 注册插件
 
@@ -16,4 +16,4 @@
 
 ## 对接步骤
 
- 查看文档：[移动OneNET对接](http://thingspanel.io/zh-Hans/docs/device-connect/service_access/onenet)
+ 查看文档：[移动OneNET对接](http://thingspanel.io/zh-Hans/docs/device-connect/service_connect/onenet)
